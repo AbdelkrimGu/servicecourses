@@ -2,8 +2,8 @@ const axios = require('axios');
 
 async function teacher(jwt) {
   try {
-    //const url = 'http://localhost:8080/api/v1/teacher'
-    const url = ' https://6960-41-103-209-184.ngrok-free.app'
+    const url = 'http://localhost:8080'
+    //const url = ' https://6960-41-103-209-184.ngrok-free.app'
     const response = await axios.get(url + '/api/v1/teacher', {
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -19,7 +19,7 @@ async function teacher(jwt) {
 }
 async function student(jwt) {
     try {
-      const url = ' https://6960-41-103-209-184.ngrok-free.app'
+      const url = 'http://localhost:8080'
       const response = await axios.get(url+ '/api/v1/student', {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -34,7 +34,7 @@ async function student(jwt) {
   }
   async function any(jwt) {
     try {
-      const url = ' https://6960-41-103-209-184.ngrok-free.app'
+      const url = 'http://localhost:8080'
       const response = await axios.get(url+ '/api/v1/any', {
         headers: {
           Authorization: `Bearer ${jwt}`,

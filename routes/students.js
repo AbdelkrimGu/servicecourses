@@ -8,7 +8,15 @@ const Student = require("../Models/Student");
 const Enrollement = require("../Models/Enrollement");
 const Teacher = require('../Models/Teacher');
 
-router.post("/enroll" , async(req,res,next)=>{
+const stripe = require("stripe")("sk_test_51N8J4xFjSH2kRPsEUuAoEVTJQCaLUGDyH0luGxdQBKP0RDLCxauwrkcOwQ3wmDmh1Sdm7GK24xbsibpygbmyOrCX00KsWNkB9k"); 
+const {Invoice, Mode} = require("chargily-epay-gateway/lib/configuration");
+
+const apiKey = "api_qCIJq19juHSIXa3t3v8YsvqOeqKOXsLJv0luyAFYxekj4mvL3iNbDsm2tlXd2sd2";
+const secretKey = "secret_eec1a65564e43e4ffa340a1d2db115bb7a695842e3877e3ea35e7cd07f6bee24";
+
+
+router.post("/balance/add" , async(req,res)=>{
+    console.log(req);
     try {
         const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
         let student = await Student.findById(user.id);
@@ -16,7 +24,73 @@ router.post("/enroll" , async(req,res,next)=>{
             const newStudent = new Student({
                 _id: user.id,
                 premium: true,
-                balance : 400
+                balance : 0
+                // Set default name here
+                // Add other default properties as necessary
+            });
+            await newStudent.save();
+        }
+        const order = new Invoice()
+        order.invoiceNumber = "100" // must be integer or string
+        order.mode = Mode.EDAHABIA // or Mode.CIB
+        order.backUrl = "https://www.exemple.org/" // must be a valid and active URL
+        order.amount = 75 // must be integer , and more or equal 75
+        order.webhookUrl = "https://www.exemple.org/webhook-validator" // this URL where receive the response 
+        order.client = "chawki mahdi" 
+        order.discount = 0 // by percentage between [0, 100]
+        order.clientEmail = "client@example.com" // email of customer where he will receive the Bill
+        order.appKey = process.env.CHARGILY_APP_KEY 
+
+        const checkoutUrl = chargily.createPayment(order).then( res => {
+            return res.checkout_url // redirect to this url to proccess the checkout 
+        });
+        
+        
+        
+    } catch (error) {
+        console.log(error);
+        res.status(401).json(error.message);
+    }
+});
+
+router.get("/balance" , async (req,res)=>{
+    try {
+        const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
+        let student = await Student.findById(user.id);
+        if (!student) {
+            const newStudent = new Student({
+                _id: user.id,
+                premium: true,
+                balance : 0
+                // Set default name here
+                // Add other default properties as necessary
+            });
+            await newStudent.save();
+        }
+        const updatedStudent = await Student.findOne({_id : user.id}).populate('enrollements');
+        if (!updatedStudent.premium) {
+            throw new Error("Student doesn't have premium access");
+        }
+        return res.json(updatedStudent);
+        
+        
+        
+    } catch (error) {
+        console.log(error);
+        res.status(401).json(error.message);
+    }
+});
+
+
+router.post("/enroll" , async(req,res)=>{
+    try {
+        const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
+        let student = await Student.findById(user.id);
+        if (!student) {
+            const newStudent = new Student({
+                _id: user.id,
+                premium: true,
+                balance : 0
                 // Set default name here
                 // Add other default properties as necessary
             });
@@ -93,7 +167,7 @@ router.get("/cours" , async(req,res)=>{
             const newStudent = new Student({
                 _id: user.id,
                 premium: true,
-                balance : 400
+                balance : 0
                 // Set default name here
                 // Add other default properties as necessary
             });
@@ -114,7 +188,7 @@ router.get("/cours" , async(req,res)=>{
         for (let i = 0; i < courses.length; i++) {
             const course = await Course.findById(courses[i]);
             specialVariable.push(course);
-          }
+        }
           // Do something with the courses array
         
         //console.log(updatedStudent);
@@ -122,6 +196,45 @@ router.get("/cours" , async(req,res)=>{
             throw new Error("Student doesn't have premium access");
         }
         res.json(specialVariable);
+
+        
+
+        // Send the list of groups in the response
+        //res.status(200).json(cours);
+        
+    } catch (error) {
+        console.log(error);
+        res.status(401).json(error);
+    }
+});
+router.get("/groups" , async(req,res)=>{
+    try {
+        const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
+        console.log(user.id);
+        let student = await Student.findById(user.id);
+        if (!student) {
+            const newStudent = new Student({
+                _id: user.id,
+                premium: true,
+                balance : 0
+                // Set default name here
+                // Add other default properties as necessary
+            });
+            await newStudent.save();
+        }
+
+        // Find the student again to make sure we have the latest version
+        const updatedStudent = await Student.findOne({_id : user.id}).populate({
+            path: 'groups'
+        });
+        
+        if (!updatedStudent) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+    
+        // The student groups can be accessed with `student.groups`
+    
+        res.json(updatedStudent.groups);
 
         
 
