@@ -7,7 +7,7 @@ const Teacher = require("../Models/Teacher");
 const Student = require("../Models/Student");
 const Enrollement = require("../Models/Enrollement");
 
-const url = "userservice-production-dd99.up.railway.app";
+const url = "https://userservicedockerised.onrender.com";
 
 router.post("/accept" , async(req,res)=>{
     try {
