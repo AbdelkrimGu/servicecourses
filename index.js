@@ -22,8 +22,8 @@ const studentRouter = require("./routes/students");
 const teacherRouter = require("./routes/teachers");
 const exploreRouter = require("./routes/explore");
 
-mongoose.connect('mongodb://127.0.0.1:27017/courses', {
-//mongoose.connect('mongodb+srv://abdelkrim:abdelkrim31052001@saned.rgalgfx.mongodb.net/courses?retryWrites=true&w=majority', {
+//mongoose.connect('mongodb://127.0.0.1:27017/courses', {
+mongoose.connect('mongodb+srv://abdelkrim:abdelkrim31052001@saned.rgalgfx.mongodb.net/courses?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })

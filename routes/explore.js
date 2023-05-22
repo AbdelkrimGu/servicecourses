@@ -4,7 +4,7 @@ const axios = require('axios');
 
 const Teacher = require('../Models/Teacher');
 
-const url = "http://localhost:8080";
+const url = "userservice-production-dd99.up.railway.app";
 
 router.get("/teachers", async (req,res) => {
     let teachers = await Teacher.find({}).populate('groups').select('-enrollements');
