@@ -160,6 +160,7 @@ router.post("/enter" , async(req,res)=>{
 
 router.get("/cours" , async(req,res)=>{
     try {
+        console.log("work");
         const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
         console.log(user.id);
         let student = await Student.findById(user.id);
@@ -207,6 +208,47 @@ router.get("/cours" , async(req,res)=>{
         res.status(401).json(error);
     }
 });
+
+router.get("/cours/:courseId" , async(req,res)=>{
+    try {
+        console.log("work");
+        const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
+        console.log(user.id);
+        let student = await Student.findById(user.id);
+        if (!student) {
+            const newStudent = new Student({
+                _id: user.id,
+                premium: true,
+                balance : 0
+                // Set default name here
+                // Add other default properties as necessary
+            });
+            await newStudent.save();
+        }
+
+        // Find the student again to make sure we have the latest version
+        const updatedStudent = await Student.findOne({_id : user.id});
+        const courseId = req.params.courseId;
+        // Find all courses associated with the given teacher ID
+        const course = await Course.findOne({_id : courseId }).populate('group');
+        console.log(course.teacher);
+
+        if(course.group.students.includes(updatedStudent._id)){
+            // Send the courses in the response
+            return res.json(course);
+        }else{
+            return res.status(402).json({message:"tu fait pas partie du groupe de ce cours"});
+        }
+
+
+        
+        
+    } catch (error) {
+        console.log(error);
+        res.status(401).json(error);
+    }
+});
+
 router.get("/groups" , async(req,res)=>{
     try {
         const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
