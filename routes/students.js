@@ -8,7 +8,7 @@ const Student = require("../Models/Student");
 const Enrollement = require("../Models/Enrollement");
 const Teacher = require('../Models/Teacher');
 
-const stripe = require("stripe")("sk_test_51N8J4xFjSH2kRPsEUuAoEVTJQCaLUGDyH0luGxdQBKP0RDLCxauwrkcOwQ3wmDmh1Sdm7GK24xbsibpygbmyOrCX00KsWNkB9k"); 
+const chargily = require('chargily-epay-gateway');
 const {Invoice, Mode} = require("chargily-epay-gateway/lib/configuration");
 
 const apiKey = "api_qCIJq19juHSIXa3t3v8YsvqOeqKOXsLJv0luyAFYxekj4mvL3iNbDsm2tlXd2sd2";
