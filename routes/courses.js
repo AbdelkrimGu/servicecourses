@@ -17,11 +17,13 @@ const role = RtcRole.PUBLISHER;
 
 const upload = multer({ dest: 'uploads/' });
  
-const expirationTimeInSeconds = 3600
+const expirationTimeInSeconds = 7200
  
 const currentTimestamp = Math.floor(Date.now() / 1000)
  
 const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
+
+const url = 'https://userservicedockerised.onrender.com'
 
 router.post("/create" , upload.array('files'), async(req,res)=>{
 //router.post("/create" , async(req,res)=>{
@@ -70,6 +72,7 @@ router.post("/create" , upload.array('files'), async(req,res)=>{
             let piecejointe = new PieceJointe({
               course: course._id,
               lien: url + response.fileId,
+              fileName: file.originalname
             });
             await piecejointe.save();
             course.piecesjointes.push(piecejointe._id);
@@ -141,16 +144,39 @@ router.get("/:courseId" , async(req,res)=>{
         teacher = await Teacher.findOne({_id : user.id});
         const courseId = req.params.courseId;
         // Find all courses associated with the given teacher ID
-        const course = await Course.find({_id : courseId, teacher: teacher._id }).populate('teacher group presents absents');
+        const course = await Course.findOne({_id : courseId, teacher: teacher._id }).populate('teacher group presents absents');
 
+        let students = course.group.students;
         // Send the courses in the response
-        res.json(course);
+        await axios.post(url + "/api/v1/open/students", { students })
+        .then(async (response) => {
+            let data = response.data;
+            console.log(data);
+            let resp = await addExtraInfo(students, data);
+            return res.json({course:course,students:resp});
+            //console.log(object);
+        })
+        .catch((error) => {
+        });
+        return res.json(course);
         
     } catch (error) {
         console.log(error);
         res.status(401).json(error);
     }
 });
+
+async function addExtraInfo(firstList, secondList) {
+    let thirdList = [];
+    for (let i = 0; i < firstList.length; i++) {
+      const studentId = firstList[i];
+      const extraInfo = secondList.find((student) => student.id === studentId);
+      if (extraInfo) {
+        thirdList[i] = { extraInfo };
+      }
+    }
+    return thirdList;
+}
 
 
 router.get('/finish/:courseId' , async(req,res)=>{
