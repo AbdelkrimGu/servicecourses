@@ -17,7 +17,6 @@ const url = 'https://userservicedockerised.onrender.com'
 
 
 router.post("/balance/add" , async(req,res)=>{
-    console.log(req);
     try {
         const user = await JwtVerifier.student(req.headers.authorization.split(' ')[1]);
         let student = await Student.findById(user.id);
@@ -34,16 +33,16 @@ router.post("/balance/add" , async(req,res)=>{
         const order = new Invoice()
         order.invoiceNumber = "100" // must be integer or string
         order.mode = Mode.EDAHABIA // or Mode.CIB
-        order.backUrl = "https://www.exemple.org/" // must be a valid and active URL
-        order.amount = 75 // must be integer , and more or equal 75
-        order.webhookUrl = "https://www.exemple.org/webhook-validator" // this URL where receive the response 
+        order.backUrl = "https://saned-v5.netlify.app/#/espace-etudiant/profile?state=accepted" // must be a valid and active URL
+        order.amount = 80 // must be integer , and more or equal 75
+        order.webhookUrl = "https://materialservice.onrender.com/api/paiement/webhook" // this URL where receive the response 
         order.client = user.nom + " " + user.prenom 
         order.discount = 0 // by percentage between [0, 100]
         order.clientEmail = user.email // email of customer where he will receive the Bill
         order.appKey = apiKey 
 
-        const checkoutUrl = chargily.createPayment(order).then( res => {
-            return res.checkout_url // redirect to this url to proccess the checkout 
+        const checkoutUrl = chargily.createPayment(order).then( resp => {
+            return res.json({url : resp.checkout_url}) // redirect to this url to proccess the checkout 
         });
         
         
