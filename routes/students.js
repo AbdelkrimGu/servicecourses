@@ -13,6 +13,7 @@ const {Invoice, Mode} = require("chargily-epay-gateway/lib/configuration");
 
 const apiKey = "api_qCIJq19juHSIXa3t3v8YsvqOeqKOXsLJv0luyAFYxekj4mvL3iNbDsm2tlXd2sd2";
 const secretKey = "secret_eec1a65564e43e4ffa340a1d2db115bb7a695842e3877e3ea35e7cd07f6bee24";
+const url = 'https://userservicedockerised.onrender.com'
 
 
 router.post("/balance/add" , async(req,res)=>{
@@ -230,11 +231,22 @@ router.get("/cours/:courseId" , async(req,res)=>{
         const updatedStudent = await Student.findOne({_id : user.id});
         const courseId = req.params.courseId;
         // Find all courses associated with the given teacher ID
-        const course = await Course.findOne({_id : courseId }).populate('group');
+        const course = await Course.findOne({_id : courseId }).populate('group piecesjointes');
         console.log(course.teacher);
 
         if(course.group.students.includes(updatedStudent._id)){
+            let students = course.group.students;
             // Send the courses in the response
+            await axios.post(url + "/api/v1/open/students", { students })
+            .then(async (response) => {
+                let data = response.data;
+                console.log(data);
+                let resp = await addExtraInfo(students, data);
+                return res.json({course:course,students:resp});
+                //console.log(object);
+            })
+            .catch((error) => {
+            });
             return res.json(course);
         }else{
             return res.status(402).json({message:"tu fait pas partie du groupe de ce cours"});
@@ -288,6 +300,18 @@ router.get("/groups" , async(req,res)=>{
         res.status(401).json(error);
     }
 });
+
+async function addExtraInfo(firstList, secondList) {
+    let thirdList = [];
+    for (let i = 0; i < firstList.length; i++) {
+      const studentId = firstList[i];
+      const extraInfo = secondList.find((student) => student.id === studentId);
+      if (extraInfo) {
+        thirdList[i] = { extraInfo };
+      }
+    }
+    return thirdList;
+}
 
 
 module.exports = router;
