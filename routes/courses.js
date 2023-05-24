@@ -23,7 +23,7 @@ const currentTimestamp = Math.floor(Date.now() / 1000)
  
 const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
 
-const url = 'https://userservicedockerised.onrender.com'
+const url = 'https://userservice-production-dd99.up.railway.app'
 
 router.post("/create" , upload.array('files'), async(req,res)=>{
 //router.post("/create" , async(req,res)=>{
